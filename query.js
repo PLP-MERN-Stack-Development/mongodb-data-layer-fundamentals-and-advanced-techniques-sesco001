@@ -11,25 +11,39 @@ async function queryBooks() {
   const client = new MongoClient(uri);
 
   try {
-    // Connect to MongoDB
     await client.connect();
     console.log("✅ Connected to MongoDB Atlas");
 
-    // Get database + collection
     const db = client.db(dbName);
     const collection = db.collection(collectionName);
 
-    // Fetch all books
-    const books = await collection.find({}).toArray();
+    // 1. Find all books
+    const allBooks = await collection.find({}).toArray();
+    console.log("\n1️⃣ All Books:");
+    allBooks.forEach((b) =>
+      console.log(`${b.title} by ${b.author} (${b.year})`)
+    );
 
-    if (books.length === 0) {
-      console.log("⚠️ No books found. Did you run insert_book.js?");
-    } else {
-      console.log("📚 Books in database:");
-      books.forEach((book, i) => {
-        console.log(`${i + 1}. ${book.title} by ${book.author} (${book.year})`);
-      });
-    }
+     // 2. Find books by a specific author
+    const authorBooks = await collection.find({ author: "George Orwell" }).toArray();
+    console.log("\n2️⃣ Books by George Orwell:");
+    console.log(authorBooks);
+
+    // 3. Find books published after 1950
+    const after1950 = await collection.find({ year: { $gt: 1950 } }).toArray();
+    console.log("\n3️⃣ Books published after 1950:");
+    console.log(after1950);
+
+    /// 4. Find books in a specific genre
+    const fictionBooks = await collection.find({ genre: "Fiction" }).toArray();
+    console.log("\n4️⃣ Fiction Books:");
+    console.log(fictionBooks);
+
+    // 5. Find in-stock books
+    const inStockBooks = await collection.find({ in_stock: true }).toArray();
+    console.log("\n5️⃣ In-stock Books:");
+    console.log(inStockBooks); 
+
   } catch (err) {
     console.error("❌ Error occurred:", err);
   } finally {
@@ -37,5 +51,5 @@ async function queryBooks() {
   }
 }
 
-// Run function
 queryBooks();
+
